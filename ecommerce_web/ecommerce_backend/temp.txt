@@ -1,7 +1,0 @@
-{
-    "fullname":"zainab",
-   "email":"zainab123@xyz.com",
-   "password":"zainab000",
-   "phone":"+924449876542"
-
-} 
