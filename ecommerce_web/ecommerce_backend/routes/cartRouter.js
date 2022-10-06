@@ -5,18 +5,17 @@ export const cartRouter = express.Router();
 cartRouter.use(express.json());
 
 //---------------------------------------Create Cart for the User---------------------------------------
-cartRouter.post("/createCart", (req, res) => {
-  const myCart = new cart({
-    user: req.body.user,
-  });
-  myCart
-    .save()
-    .then((result) => {
-      res.status(201).send("Cart created" + result);
-    })
-    .catch((err) => {
-      res.status(500).send(err);
+cartRouter.post("/createCart", async (req, res) => {
+  try {
+    const myCart = new cart({
+      user: req.body.user,
     });
+    const cart_ = await myCart.save();
+    res.status(201).send(cart_);
+  } catch (err) {
+    console.log("Error in creating cart: ", err);
+    res.status(500).send(err);
+  }
 });
 
 //---------------------------------------Update Cart---------------------------------------
@@ -86,36 +85,35 @@ cartRouter.put("/addToCart/:user", async (req, res) => {
 // });
 
 //---------------------------------------Get Cart---------------------------------------
-cartRouter.get("/myCart/:user", (req, res) => {
+cartRouter.get("/myCart/:user", async (req, res) => {
   const cartData = [];
   const items = [];
+  try {
+    const data = await cart
+      .find({ user: req.params.user })
+      .populate({ path: "products._id", model: "Product" });
+    for (let i = 0; i < data[0].products.length; i++) {
+      const product = {
+        _id: data[0].products[i]._id._id,
+        name: data[0].products[i]._id.name,
+        desc: data[0].products[i]._id.desc,
+        price: data[0].products[i]._id.price,
+        rating: data[0].products[i]._id.rating,
+        image: data[0].products[i]._id.image,
+        quantity: data[0].products[i].quantity,
+        totalPrice: data[0].products[i].totalPrice,
+      };
+      items.push(product);
+    }
+    cartData.push(items);
+    cartData.push(data[0].bill);
+    cartData.push(data[0].totalQuantity);
 
-  cart
-    .find({ user: req.params.user })
-    .populate({ path: "products._id", model: "Product" })
-    .then((data) => {
-      for (let i = 0; i < data[0].products.length; i++) {
-        const product = {
-          _id: data[0].products[i]._id._id,
-          name: data[0].products[i]._id.name,
-          desc: data[0].products[i]._id.desc,
-          price: data[0].products[i]._id.price,
-          rating: data[0].products[i]._id.rating,
-          image: data[0].products[i]._id.image,
-          quantity: data[0].products[i].quantity,
-          totalPrice: data[0].products[i].totalPrice,
-        };
-        items.push(product);
-      }
-      cartData.push(items);
-      cartData.push(data[0].bill);
-      cartData.push(data[0].totalQuantity);
-      // res.send(data);
-      res.send(cartData);
-      console.log("Cart data in get cart api", cartData);
-    })
-    .catch((err) => {
-      res.status(500).send(err);
-      console.log("err", err);
-    });
+    // res.send(data);
+    res.send(cartData);
+    console.log("Cart data in get cart api", cartData);
+  } catch (err) {
+    res.status(500).send(err);
+    console.log("err", err);
+  }
 });

@@ -1,12 +1,12 @@
 import React from "react";
-import { ProductImage } from "./ProductImage";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
+import { ProductImage } from "./ProductImage";
 import { addProductToCart } from "../redux/cartSlice";
 export const Card = ({ product }) => {
   const dispatch = useDispatch();
-
   const navigate = useNavigate();
+
   const getDetails = () => {
     console.log("product: ", product);
     window.scrollTo(0, 0);
@@ -15,15 +15,6 @@ export const Card = ({ product }) => {
 
   const addToCart = () => {
     dispatch(addProductToCart(product));
-
-    // axios
-    //   .put(`addToCart/${user?._id}/${product?._id}`)
-    //   .then((response) => {
-    //     console.log("response: ", response);
-    //   })
-    //   .catch((err) => {
-    //     console.log("error: ", err);
-    //   });
   };
   return (
     <div

@@ -1,66 +1,33 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import PhoneInput from "react-phone-number-input";
+import { validateEmail } from "../utils/validateEmail";
 import { Popup } from "./Popup";
 import { InputError } from "./InputError";
-
-import PhoneInput from "react-phone-number-input";
+import { setUser, SignUp } from "../redux/userSlice";
+import { createCart, setCartCreated } from "../redux/cartSlice";
 import "react-phone-number-input/style.css";
-
 import "../style/form.css";
-import { validateEmail } from "../utils/validateEmail";
 
 export const Signup = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const isCartCreated = useSelector((state) => state.cart.cartCreated);
+  const user = useSelector((state) => state.user.user);
+  const message = useSelector((state) => state.user.err);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phone, setphone] = useState();
   const [popup, setPopup] = useState(false);
-  const [message, setMessage] = useState("");
   const [emailError, setEmailError] = useState(null);
   const [phoneError, setPhoneError] = useState(null);
-  const navigate = useNavigate();
 
   const updatePopup = (value) => {
     setPopup(value);
   };
-  // console.log("popup: ", popup);
-  const createUser = async () => {
-    return axios
-      .post("/signup", {
-        fullname: name,
-        email: email,
-        password: password,
-        phone: phone,
-      })
-      .then((response) => {
-        console.log("response: ", response);
-        if (response.status === 201) {
-          alert("User created successfully!");
 
-          return response.data;
-        }
-      })
-      .catch((err) => {
-        console.log("err: ", err);
-        setMessage(err.response.data);
-        updatePopup(true);
-      });
-  };
-  const createCart = (user) => {
-    console.log("id: ", user._id);
-    axios
-      .post("/createCart", {
-        user: user._id,
-      })
-      .then((response) => {
-        console.log("response: ", response);
-        navigate("/login");
-      })
-      .catch((err) => {
-        console.log("error: ", err);
-      });
-  };
   const handleEmail = (e) => {
     setEmail(e.target.value);
     const msg = validateEmail(e);
@@ -76,20 +43,35 @@ export const Signup = () => {
       setPhoneError("Enter a valid phone number");
     }
   };
+
+  //handle Submit
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (emailError === null && phoneError === null) {
       console.log("passsed", emailError, phoneError);
-
-      const user = await createUser();
-      if (user) {
-        createCart(user);
+      dispatch(setCartCreated(false));
+      dispatch(setUser(false));
+      dispatch(
+        SignUp({
+          fullname: name,
+          email: email,
+          password: password,
+          phone: phone,
+        })
+      );
+      if (message) {
+        updatePopup(true);
       }
-      console.log("data of axios: ", user);
     } else {
       console.log("input validation failed", emailError, phoneError);
     }
   };
+  useEffect(() => {
+    if (user && !isCartCreated) {
+      dispatch(createCart(user));
+      navigate("/login");
+    }
+  }, [user]);
 
   return (
     <>

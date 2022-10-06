@@ -1,27 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addProductToCart } from "../redux/cartSlice";
-import axios from "axios";
+import { getSpecificProduct } from "../redux/productSlice";
 import "../style/product.css";
+
 export const Product = () => {
   const dispatch = useDispatch();
+  const product = useSelector((state) => state.products.product);
   const { id } = useParams();
   console.log("id in product.js: ", id);
-  const [product, setProduct] = useState(null);
-  const getProduct = async () => {
-    return await axios
-      .get(`/products/${id}`)
-      .then((product) => {
-        console.log("product found: ", product);
-        setProduct(product.data);
-      })
-      .catch((err) => {
-        console.log("error: ", err);
-      });
-  };
+
   useEffect(() => {
-    getProduct();
+    dispatch(getSpecificProduct(id));
   }, [id]);
   return (
     <>

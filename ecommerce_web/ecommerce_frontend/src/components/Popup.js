@@ -1,6 +1,7 @@
 import React from "react";
 import "../style/popup.css";
 export const Popup = ({ message, updatePopup }) => {
+  console.log("in popup: ", message);
   const close = () => {
     updatePopup(false);
     console.log("clicked");

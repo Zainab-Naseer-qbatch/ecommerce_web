@@ -22,7 +22,7 @@ const App = () => {
             exact
             path="/"
             element={
-              useSelector((state) => state.user.user) != null ? (
+              useSelector((state) => state.user.loggedUser) != null ? (
                 <Navigate to="/home/welcome" />
               ) : (
                 <Navigate to="/login" />

@@ -4,16 +4,18 @@ import { saveCart } from "./utils/saveCart";
 import Badge from "@material-ui/core/Badge";
 import { Link, useNavigate } from "react-router-dom";
 // src/components/Item.js
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 import "./style/navbar.css";
-import { loggedUser } from "./redux/userSlice";
+import { setLoggedUser, setIsLoggedIn } from "./redux/userSlice";
+import { addToCart } from "./redux/cartSlice";
 
 export const NavBar = ({ user }) => {
-  const quantity = useSelector((state) => state.cart.totalQuantity);
+  const totalQuantity = useSelector((state) => state.cart.totalQuantity);
   const cart = useSelector((state) => state.cart.cart);
   const bill = useSelector((state) => state.cart.bill);
-  console.log("total qty in nav bar: ", quantity);
+  console.log("total qty in nav bar: ", totalQuantity);
+  const dispatch = useDispatch();
   console.log("mycart: ", cart);
   // console.log("user in nav bar: ", user);
   const navigate = useNavigate();
@@ -21,17 +23,14 @@ export const NavBar = ({ user }) => {
   // const myuser = JSON.parse(user_);
   console.log("user in nav bar: ", user);
   const logout = async () => {
-    try {
-      saveCart(user, cart, bill, quantity);
-    } catch (err) {
-      console.log("error: ", err);
-    } finally {
-      // dispatch(setCart({ cart: [], bill: 0, totalQuantity: 0 }));
-      // localStorage.clear("user");
-      loggedUser(null);
-      navigate("/login");
-      // console.log(localStorage.getItem("user"));
-    }
+    dispatch(addToCart({ user, cart, bill, totalQuantity }));
+
+    // dispatch(setCart({ cart: [], bill: 0, totalQuantity: 0 }));
+    // localStorage.clear("user");
+    dispatch(setLoggedUser(null));
+    dispatch(setIsLoggedIn(null));
+    // navigate("/login");
+    // console.log(localStorage.getItem("user"));
   };
   return (
     <nav
@@ -77,7 +76,7 @@ export const NavBar = ({ user }) => {
             style={{ cursor: "pointer" }}
             onClick={() => navigate("cart")}
           >
-            <Badge color="secondary" badgeContent={quantity}>
+            <Badge color="secondary" badgeContent={totalQuantity}>
               <Cart height={"30px"} width={"30px"} />
             </Badge>
           </div>

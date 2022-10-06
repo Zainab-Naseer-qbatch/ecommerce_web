@@ -11,11 +11,9 @@ export const Cart = () => {
   const headingStyle = {
     color: "#0c7d7d",
   };
-  const myCart = useSelector((state) => state.cart.cart);
-  console.log("cart in cart component: ", myCart);
-  const bill = useSelector((state) => state.cart.bill);
-  console.log("bill: ", bill, typeof bill);
   const dispatch = useDispatch();
+  const myCart = useSelector((state) => state.cart.cart);
+  const bill = useSelector((state) => state.cart.bill);
 
   return (
     <>
@@ -144,13 +142,13 @@ export const Cart = () => {
                   </div>
                 </div>
 
-                <a
-                  href="#"
+                <Link
+                  to=""
                   className="mybtn btn btn-primary"
                   style={{ marginBottom: "30px" }}
                 >
                   Checkout
-                </a>
+                </Link>
               </div>
             </div>
           </div>

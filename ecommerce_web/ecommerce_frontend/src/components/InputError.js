@@ -1,8 +1,7 @@
 import React from "react";
 
 export const InputError = ({ error, margin }) => {
-  // console.log("margin: ", typeof margin);
-
+  console.log("inside input error", error);
   return (
     <span
       style={{

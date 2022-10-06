@@ -1,16 +1,59 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
+const initialState = {
+  cart: [],
+  totalQuantity: 0,
+  bill: 0,
+  err: "",
+  cartCreated: false,
+};
 
-const initialState = { cart: [], totalQuantity: 0, bill: 0 };
+export const createCart = createAsyncThunk(
+  "cart/createCart",
+  async (user, thunkAPI) => {
+    try {
+      const response = await axios.post("/createCart", {
+        user: user._id,
+      });
+      return response.data;
+    } catch (err) {
+      return thunkAPI.rejectWithValue({ err: err });
+    }
+  }
+);
+
+export const getCart = createAsyncThunk(
+  "cart/getCart",
+  async (user, thunkAPI) => {
+    try {
+      const response = await axios.get(`/myCart/${user._id}`);
+      return response.data;
+    } catch (err) {
+      return thunkAPI.rejectWithValue(err);
+    }
+  }
+);
+
+export const addToCart = createAsyncThunk(
+  "cart/addToCart",
+  async ({ user, cart, bill, totalQuantity }, thunkAPI) => {
+    try {
+      const response = await axios.put(`/addToCart/${user._id}`, {
+        products: cart,
+        bill: bill,
+        totalQuantity: totalQuantity,
+      });
+      return response;
+    } catch (err) {
+      return thunkAPI.rejectWithValue(err);
+    }
+  }
+);
 const cartSlice = createSlice({
   name: "cart",
   initialState: initialState,
   reducers: {
     setCart(state, action) {
-      console.log("set cart dispacthed");
-      // console.log("bill in set cart: ", action.payload);
-      console.log("cart state in payload", action.payload);
-      console.log("cart state in state", state.totalQuantity);
-
       state.cart = action.payload.products;
       state.bill = action.payload.bill;
       state.totalQuantity = action.payload.totalQuantity;
@@ -23,8 +66,6 @@ const cartSlice = createSlice({
         isAdded.quantity += 1;
         isAdded.totalPrice = action.payload.price * isAdded.quantity;
         state.bill += isAdded.price;
-
-        console.log("bill in cart slice: ", state.bill);
       } else {
         state.cart.push({
           ...action.payload,
@@ -67,6 +108,45 @@ const cartSlice = createSlice({
       state.bill -= totalPrice;
       state.cart = filteredCart;
     },
+    setCartCreated(state, action) {
+      state.cartCreated = action.payload;
+    },
+  },
+  extraReducers: {
+    [createCart.pending]: (state, action) => {
+      state.cartCreated = false;
+      console.log(action.type);
+    },
+    [createCart.fulfilled]: (state, action) => {
+      state.cartCreated = true;
+      state.cart = action.payload.products;
+    },
+    [createCart.rejected]: (state, action) => {
+      state.cartCreated = false;
+      state.err = action.payload;
+    },
+    [getCart.pending]: (state, action) => {
+      return {
+        ...state,
+      };
+    },
+    [getCart.fulfilled]: (state, action) => {
+      state.cart = action.payload[0];
+      state.bill = action.payload[1];
+      state.totalQuantity = action.payload[2];
+    },
+    [getCart.rejected]: (state, action) => {
+      state.err = action.payload;
+    },
+    [addToCart.pending]: (state, action) => {
+      console.log(action.type);
+    },
+    [addToCart.fulfilled]: (state, action) => {
+      state.err = "";
+    },
+    [addToCart.rejected]: (state, action) => {
+      state.err = action.payload;
+    },
   },
 });
 export const {
@@ -75,5 +155,6 @@ export const {
   increaseQuantity,
   decreaseQuantity,
   removeProduct,
+  setCartCreated,
 } = cartSlice.actions;
 export const cartReducer = cartSlice.reducer;

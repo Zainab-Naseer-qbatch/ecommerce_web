@@ -20,35 +20,3 @@ db.once("open", function () {
 app.listen(PORT, () => {
   console.log("app started!");
 });
-// async function method() {
-//   const mycart = await cart.find({ user: "63297acedc9dbef5a46ca374" });
-
-//   const mycart2 = await cart.findOneAndUpdate(
-//     { _id: mycart[0]._id },
-//     {
-//       $push: {
-//         products: "6329ac287480114a7553058e",
-//       },
-//     }
-//   );
-//   console.log("my updated cart", mycart2);
-
-// const userCart = await cart
-//   .find({ user: "63297acedc9dbef5a46ca374" })
-//   .then((data) => {
-//     console.log("data: ", data);
-//     cart.update({
-//       _id:
-//     })
-//   });
-// }
-// method();
-// const newUser=new user({fullname:"Zainab Naseer",email:"zainab@gmail.com",password:"za03334868151?",phone:923334868151})
-// newUser.save((err,data)=>{
-//     if(err){
-//         console.log("error",err)
-//     }
-//     else{
-//         console.log("data",data)
-//     }
-// });

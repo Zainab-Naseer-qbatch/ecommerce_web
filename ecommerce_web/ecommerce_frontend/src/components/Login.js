@@ -1,74 +1,22 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
-import { InputError } from "./InputError";
+import { useDispatch, useSelector } from "react-redux";
 import { validateEmail } from "../utils/validateEmail";
-import { useDispatch } from "react-redux";
-import { setCart } from "../redux/cartSlice";
-import { loggedUser } from "../redux/userSlice";
+import { InputError } from "./InputError";
+import { getCart } from "../redux/cartSlice";
+import { login } from "../redux/userSlice";
 import "../style/form.css";
 
 export const Login = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const errorState = useSelector((state) => state.user.err);
+  const isloggedIn = useSelector((state) => state.user.isloggedIn);
+  const loggedUser = useSelector((state) => state.user.loggedUser);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState(null);
-  const [pwdError, setPwdError] = useState(null);
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const getCart = async (user) => {
-    console.log("user before getting cart", user._id);
-    await axios
-      .get(`/myCart/${user._id}`)
-      .then((data) => {
-        console.log("getting cart from db: ", data.data);
-        console.log("data: ", data);
-        console.log("before setting cart: quantity: ", data.data[2]);
-        dispatch(
-          setCart({
-            products: data.data[0],
-            bill: data.data[1],
-            totalQuantity: data.data[2],
-          })
-        );
-      })
-      .catch((err) => {
-        console.log("error in getting cart: ", err);
-      });
-
-    // return "hello";
-  };
-
-  console.log("login comp");
-
-  const login = () => {
-    console.log("inside login");
-    axios
-      .post("/login", {
-        email: email,
-        password: password,
-      })
-      .then(async (data) => {
-        console.log("inside axios ");
-        console.log("data: ", data);
-        dispatch(loggedUser(data.data));
-        // localStorage.setItem("user", JSON.stringify(data.data));
-
-        setPwdError(null);
-        const mydata = await getCart(data.data);
-        console.log("data from get cart: ", mydata);
-        navigate("/home/welcome");
-      })
-      .catch((err) => {
-        console.log("in catch block", err);
-        if (err?.response?.status === 403) {
-          setPwdError(err?.response?.data);
-          console.log(err);
-        } else if (err?.response?.status === 404) {
-          setEmailError(err?.response?.data);
-        }
-      });
-  };
-
+  const [error, setError] = useState(errorState);
   const handleEmail = (e) => {
     setEmail(e.target.value);
     const msg = validateEmail(e);
@@ -78,12 +26,24 @@ export const Login = () => {
     e.preventDefault();
     if (emailError === null) {
       console.log("passsed", emailError);
-      login();
-      // console.log("after login", user);
+      dispatch(login({ email, password }));
     } else {
       console.log("input validation failed", emailError);
     }
   };
+  useEffect(() => {
+    console.log("inside useeffect: ", isloggedIn);
+
+    if (isloggedIn) {
+      console.log("islogged in: ", isloggedIn);
+      dispatch(getCart(loggedUser));
+      navigate("/home/welcome");
+    }
+  }, [isloggedIn]);
+  useEffect(() => {
+    setError(errorState);
+  }, []);
+
   return (
     <>
       <div className="container">
@@ -107,7 +67,6 @@ export const Login = () => {
                       onChange={handleEmail}
                       required={true}
                     />
-                    <InputError error={emailError} margin={"18rem"} />
                   </div>
 
                   <div
@@ -126,7 +85,7 @@ export const Login = () => {
                       }}
                       required={true}
                     />
-                    <InputError error={pwdError} margin={"22rem"} />
+                    <InputError error={error} margin={"18rem"} />
                   </div>
 
                   <div className="d-flex flex-row align-items-center justify-content-between">

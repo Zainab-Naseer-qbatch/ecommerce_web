@@ -1,12 +1,13 @@
 import express from "express";
 import bodyParser from "body-parser";
-import { user } from "../models/users.js";
 import validator from "email-validator";
-import { validatePhone } from "../utils/phoneValidation.js";
+import cookieParser from "cookie-parser";
 import { checkEmail } from "../middlewares/checkEmail.js";
+import { validatePhone } from "../utils/phoneValidation.js";
 import { encryptPassword, decryptPassword } from "../utils/password_hashing.js";
 import { createSignature } from "../utils/jwtSignature.js";
-import cookieParser from "cookie-parser";
+import { user } from "../models/users.js";
+
 export const userRouter = express.Router();
 userRouter.use(express.json());
 userRouter.use(bodyParser.urlencoded({ extended: false }));
@@ -41,35 +42,33 @@ userRouter.post("/signup", checkEmail, async (req, res) => {
 
 //---------------------------------------Login---------------------------------------
 userRouter.post("/login", async (req, res) => {
-  user
-    .find({ email: req.body.email })
-    .select({ __v: 0 })
-    .then(async (user) => {
-      if (user[0]) {
-        const isPasswordValid = await decryptPassword(
-          req.body.password,
-          user[0].password
-        );
-        // console.log(isPasswordValid);
+  try {
+    const myUser = await user
+      .find({ email: req.body.email })
+      .select({ __v: 0 });
 
-        if (isPasswordValid) {
-          console.log("User authenticated");
-          const _user = user[0];
-          const token = createSignature(user[0]);
-          // console.log("sign: ",token);
-          res.cookie("token", token, { httpOnly: true });
-          console.log("user", _user);
-          res.status(200).send(_user);
-        } else {
-          console.log("Password is invalid!");
-          res.status(403).send("Invalid Password!");
-        }
+    if (myUser[0]) {
+      const isPasswordValid = await decryptPassword(
+        req.body.password,
+        myUser[0].password
+      );
+
+      if (isPasswordValid) {
+        console.log("User authenticated");
+        const _user = myUser[0];
+        const token = createSignature(myUser[0]);
+        res.cookie("token", token, { httpOnly: true });
+        console.log("user", _user);
+        res.status(200).send(_user);
       } else {
-        res.status(404).send("This User doesn't exists");
+        console.log("Password is invalid!");
+        res.status(403).send("Invalid Password!");
       }
-    })
-    .catch((err) => {
-      console.log("error: ", err);
-      res.send(err);
-    });
+    } else {
+      res.status(404).send("This User doesn't exists");
+    }
+  } catch (err) {
+    console.log("error: ", err);
+    res.send(err);
+  }
 });
