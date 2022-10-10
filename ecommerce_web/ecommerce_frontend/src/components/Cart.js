@@ -12,12 +12,11 @@ export const Cart = () => {
     color: "#0c7d7d",
   };
   const dispatch = useDispatch();
-  const myCart = useSelector((state) => state.cart.cart);
-  const bill = useSelector((state) => state.cart.bill);
+  const { cart, bill } = useSelector((state) => state.cart);
 
   return (
     <>
-      {myCart?.length > 0 ? (
+      {cart?.length > 0 ? (
         <>
           <div
             className="mx-5 my-3 mb-5 text-center"
@@ -66,7 +65,7 @@ export const Cart = () => {
                     </h5>
                   </div>
                 </div>
-                {myCart.map((item) => {
+                {cart.map((item) => {
                   return (
                     <>
                       <div className="row">

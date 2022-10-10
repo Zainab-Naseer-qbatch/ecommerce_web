@@ -12,4 +12,5 @@ const productSchema = new mongoose.Schema({
   price: Number,
   rating: Number,
 });
-export const Product = mongoose.model("Product", productSchema);
+const product = mongoose.model("product", productSchema);
+export default product;

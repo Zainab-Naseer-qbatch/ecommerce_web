@@ -8,10 +8,9 @@ import { getProducts } from "../redux/productSlice";
 export const AllProducts = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const user = useSelector((state) => state.user.user);
-  const products = useSelector((state) => state.products.products);
-  const loading = useSelector((state) => state.products.loading);
-  const error = useSelector((state) => state?.product?.err);
+  const { loggedUser } = useSelector((state) => state.user);
+  const { products, loading, err } = useSelector((state) => state.products);
+
   const [classname, setClassName] = useState("");
   const { id } = useParams();
 
@@ -22,15 +21,9 @@ export const AllProducts = () => {
       setClassName("");
     }
   }, [id]);
-  console.log("params: ", id);
 
-  console.log("products from redux store: ", products);
-
-  console.log("user in home :", user);
-
-  //get all products when component renders for the first time(Mounting phase)
   useEffect(() => {
-    if (user) {
+    if (loggedUser) {
       dispatch(getProducts());
     } else {
       navigate("/login");
@@ -41,8 +34,8 @@ export const AllProducts = () => {
     <>
       {loading ? (
         "Loading..."
-      ) : error ? (
-        alert(error)
+      ) : err ? (
+        alert(err)
       ) : (
         <>
           <div className="row">

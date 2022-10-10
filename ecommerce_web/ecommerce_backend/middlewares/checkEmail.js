@@ -1,10 +1,15 @@
-import { user } from "../models/users.js";
+import User from "../models/users.js";
 
-export const checkEmail = async (req, res, next) => {
-  const user_ = await user.find({ email: req.body.email }).count();
-  if (user_ === 1) {
-    res.status(409).send("User already Exists");
+const checkEmail = async (req, res, next) => {
+  const { email } = req.body;
+  const user = await User.find({ email: email }).count();
+  if (user === 1) {
+    res.status(409).json({
+      success: false,
+      message: "User already Exists",
+    });
   } else {
     next();
   }
 };
+export default checkEmail;

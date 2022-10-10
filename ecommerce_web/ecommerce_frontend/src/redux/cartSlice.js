@@ -1,42 +1,36 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
-const initialState = {
-  cart: [],
-  totalQuantity: 0,
-  bill: 0,
-  err: "",
-  cartCreated: false,
-};
 
 export const createCart = createAsyncThunk(
   "cart/createCart",
-  async (user, thunkAPI) => {
+  async (user, { rejectWithValue }) => {
+    const { _id } = user;
     try {
       const response = await axios.post("/createCart", {
-        user: user._id,
+        user: _id,
       });
       return response.data;
     } catch (err) {
-      return thunkAPI.rejectWithValue({ err: err });
+      return rejectWithValue(err);
     }
   }
 );
 
 export const getCart = createAsyncThunk(
   "cart/getCart",
-  async (user, thunkAPI) => {
+  async (user, { rejectWithValue }) => {
     try {
       const response = await axios.get(`/myCart/${user._id}`);
       return response.data;
     } catch (err) {
-      return thunkAPI.rejectWithValue(err);
+      return rejectWithValue(err);
     }
   }
 );
 
 export const addToCart = createAsyncThunk(
   "cart/addToCart",
-  async ({ user, cart, bill, totalQuantity }, thunkAPI) => {
+  async ({ user, cart, bill, totalQuantity }, { rejectWithValue }) => {
     try {
       const response = await axios.put(`/addToCart/${user._id}`, {
         products: cart,
@@ -45,85 +39,106 @@ export const addToCart = createAsyncThunk(
       });
       return response;
     } catch (err) {
-      return thunkAPI.rejectWithValue(err);
+      return rejectWithValue(err);
     }
   }
 );
 const cartSlice = createSlice({
   name: "cart",
-  initialState: initialState,
+  initialState: {
+    cart: [],
+    totalQuantity: 0,
+    bill: 0,
+    err: "",
+    cartCreated: false,
+  },
   reducers: {
     setCart(state, action) {
-      state.cart = action.payload.products;
-      state.bill = action.payload.bill;
-      state.totalQuantity = action.payload.totalQuantity;
+      const { products, bill, totalQuantity } = action.payload;
+      return {
+        ...state,
+        cart: products,
+        bill,
+        totalQuantity,
+      };
     },
     addProductToCart(state, action) {
-      const isAdded = state.cart.find(
-        (product) => product._id === action.payload._id
-      );
+      const { _id, price } = action.payload;
+      const isAdded = state.cart.find((product) => product._id === _id);
       if (isAdded) {
         isAdded.quantity += 1;
-        isAdded.totalPrice = action.payload.price * isAdded.quantity;
+        isAdded.totalPrice = price * isAdded.quantity;
         state.bill += isAdded.price;
       } else {
         state.cart.push({
           ...action.payload,
           quantity: 1,
-          totalPrice: action.payload.price,
+          totalPrice: price,
         });
-        state.bill += action.payload.price;
+        state.bill += price;
       }
       state.totalQuantity += 1;
     },
 
     increaseQuantity(state, action) {
-      const product = state.cart.find(
-        (product) => product._id === action.payload._id
-      );
+      const { _id, price } = action.payload;
+      const product = state.cart.find((product) => product._id === _id);
       product.quantity += 1;
-      product.totalPrice = action.payload.price * product.quantity;
+      product.totalPrice = price * product.quantity;
       state.bill += product.price;
 
       state.totalQuantity += 1;
     },
     decreaseQuantity(state, action) {
-      const product = state.cart.find(
-        (product) => product._id === action.payload._id
-      );
+      const { _id, price } = action.payload;
+
+      const product = state.cart.find((product) => product._id === _id);
       if (product.quantity > 1) {
         product.quantity -= 1;
-        product.totalPrice = action.payload.price * product.quantity;
+        product.totalPrice = price * product.quantity;
         state.bill -= product.price;
         state.totalQuantity -= 1;
       }
     },
     removeProduct(state, action) {
-      const quantity = action.payload.quantity;
-      const totalPrice = action.payload.totalPrice;
-      const filteredCart = state.cart.filter(
-        (product) => product._id !== action.payload._id
-      );
+      const { _id, quantity, totalPrice } = action.payload;
+      const filteredCart = state.cart.filter((product) => product._id !== _id);
+
       state.totalQuantity -= quantity;
       state.bill -= totalPrice;
       state.cart = filteredCart;
     },
     setCartCreated(state, action) {
-      state.cartCreated = action.payload;
+      const { payload } = action;
+      return {
+        ...state,
+        cartCreated: payload,
+      };
     },
   },
   extraReducers: {
     [createCart.pending]: (state, action) => {
-      state.cartCreated = false;
-      console.log(action.type);
+      return {
+        ...state,
+        cartCreated: false,
+      };
     },
     [createCart.fulfilled]: (state, action) => {
-      state.cartCreated = true;
-      state.cart = action.payload.products;
+      const { products } = action.payload.cart.products;
+      return {
+        ...state,
+        err: "",
+        cartCreated: true,
+        cart: products,
+      };
     },
     [createCart.rejected]: (state, action) => {
-      state.cartCreated = false;
-      state.err = action.payload;
+      const { err } = action.payload.err;
+      return {
+        ...state,
+        cartCreated: false,
+        err,
+      };
     },
     [getCart.pending]: (state, action) => {
       return {
@@ -131,24 +146,40 @@ const cartSlice = createSlice({
       };
     },
     [getCart.fulfilled]: (state, action) => {
-      state.cart = action.payload[0];
-      state.bill = action.payload[1];
-      state.totalQuantity = action.payload[2];
+      const { products, bill, totalQuantity } = action.payload?.cart;
+      return {
+        ...state,
+        err: "",
+        cart: products,
+        bill,
+        totalQuantity,
+      };
     },
     [getCart.rejected]: (state, action) => {
-      state.err = action.payload;
+      const { err } = action.payload;
+      return {
+        ...state,
+        err,
+      };
     },
     [addToCart.pending]: (state, action) => {
-      console.log(action.type);
+      return {
+        ...state,
+      };
     },
-    [addToCart.fulfilled]: (state, action) => {
-      state.err = "";
+    [addToCart.fulfilled]: (state) => {
+      return { ...state, err: "" };
     },
     [addToCart.rejected]: (state, action) => {
-      state.err = action.payload;
+      const { err } = action.payload.err;
+      return {
+        ...state,
+        err,
+      };
     },
   },
 });
+const { reducer, actions } = cartSlice;
 export const {
   setCart,
   addProductToCart,
@@ -156,5 +187,5 @@ export const {
   decreaseQuantity,
   removeProduct,
   setCartCreated,
-} = cartSlice.actions;
-export const cartReducer = cartSlice.reducer;
+} = actions;
+export default reducer;

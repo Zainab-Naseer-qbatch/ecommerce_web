@@ -7,9 +7,9 @@ import "../style/product.css";
 
 export const Product = () => {
   const dispatch = useDispatch();
-  const product = useSelector((state) => state.products.product);
+
+  const { product } = useSelector((state) => state.products);
   const { id } = useParams();
-  console.log("id in product.js: ", id);
 
   useEffect(() => {
     dispatch(getSpecificProduct(id));

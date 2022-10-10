@@ -1,15 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const initialState = {
-  products: [],
-  loading: true,
-  product: {},
-  err: "",
-};
-
 export const getProducts = createAsyncThunk(
-  //action type string
   "products/getProducts",
   async (thunkAPI) => {
     try {
@@ -21,64 +13,69 @@ export const getProducts = createAsyncThunk(
   }
 );
 export const getSpecificProduct = createAsyncThunk(
-  //action type string
   "products/getSpecificProduct",
-  async (id, thunkAPI) => {
+  async (id, { rejectWithValue }) => {
     try {
       const response = await axios.get(`/products/${id}`);
 
       return response.data;
     } catch (err) {
-      console.log("error: ", err);
-      return thunkAPI.rejectWithValue(err);
+      return rejectWithValue(err);
     }
   }
 );
 
 const productSlice = createSlice({
   name: "products",
-  initialState: initialState,
+  initialState: {
+    products: [],
+    loading: false,
+    product: {},
+    err: "",
+  },
   reducers: {},
   extraReducers: {
     [getProducts.pending]: (state, action) => {
-      console.log("initial dispatching");
-      console.log("type: ", action.type);
-
-      state.loading = true;
+      return {
+        ...state,
+        loading: true,
+      };
     },
     [getProducts.fulfilled]: (state, action) => {
-      console.log("type: ", action.type);
-      console.log("payload of fulfilled", action.payload);
-
-      state.loading = false;
-      state.products = action.payload;
+      const { products } = action.payload;
+      return {
+        ...state,
+        loading: false,
+        products: products,
+      };
     },
     [getProducts.rejected]: (state, action) => {
-      console.log("type: ", action.type);
-      //   console.log("error: ", action.payload);
-
-      state.loading = false;
-      state.err = action.payload;
-      // alert(action.payload);
+      const { err } = action.payload;
+      return {
+        ...state,
+        loading: false,
+        err,
+      };
     },
 
     [getSpecificProduct.pending]: (state, action) => {
-      console.log("initial dispatching");
-      console.log("type: ", action.type);
       return { ...state };
     },
     [getSpecificProduct.fulfilled]: (state, action) => {
-      console.log("type: ", action.type);
-      console.log("payload of fulfilled", action.payload);
-      state.product = action.payload;
+      const { product } = action.payload;
+      return {
+        ...state,
+        product: product,
+      };
     },
     [getSpecificProduct.rejected]: (state, action) => {
-      console.log("type: ", action.type);
-      state.err = action.payload;
-      //   console.log("error: ", action.payload);
-
-      // alert(action.payload);
+      const { err } = action.payload;
+      return {
+        ...state,
+        err,
+      };
     },
   },
 });
-export const productReducer = productSlice.reducer;
+const { reducer } = productSlice;
+export default reducer;

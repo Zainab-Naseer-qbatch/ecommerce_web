@@ -1,9 +1,7 @@
 import React from "react";
 import { Cart } from "./components/icons/Cart";
-import { saveCart } from "./utils/saveCart";
 import Badge from "@material-ui/core/Badge";
 import { Link, useNavigate } from "react-router-dom";
-// src/components/Item.js
 import { useDispatch, useSelector } from "react-redux";
 
 import "./style/navbar.css";
@@ -11,26 +9,15 @@ import { setLoggedUser, setIsLoggedIn } from "./redux/userSlice";
 import { addToCart } from "./redux/cartSlice";
 
 export const NavBar = ({ user }) => {
-  const totalQuantity = useSelector((state) => state.cart.totalQuantity);
-  const cart = useSelector((state) => state.cart.cart);
-  const bill = useSelector((state) => state.cart.bill);
-  console.log("total qty in nav bar: ", totalQuantity);
   const dispatch = useDispatch();
-  console.log("mycart: ", cart);
-  // console.log("user in nav bar: ", user);
   const navigate = useNavigate();
-  // const user_ = localStorage.getItem("user");
-  // const myuser = JSON.parse(user_);
-  console.log("user in nav bar: ", user);
+  const { totalQuantity, cart, bill } = useSelector((state) => state.cart);
   const logout = async () => {
     dispatch(addToCart({ user, cart, bill, totalQuantity }));
 
-    // dispatch(setCart({ cart: [], bill: 0, totalQuantity: 0 }));
-    // localStorage.clear("user");
     dispatch(setLoggedUser(null));
     dispatch(setIsLoggedIn(null));
-    // navigate("/login");
-    // console.log(localStorage.getItem("user"));
+    navigate("/login");
   };
   return (
     <nav

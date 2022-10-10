@@ -13,9 +13,8 @@ import "../style/form.css";
 export const Signup = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const isCartCreated = useSelector((state) => state.cart.cartCreated);
-  const user = useSelector((state) => state.user.user);
-  const message = useSelector((state) => state.user.err);
+  const { cartCreated } = useSelector((state) => state.cart);
+  const { user, err } = useSelector((state) => state.user);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -44,11 +43,9 @@ export const Signup = () => {
     }
   };
 
-  //handle Submit
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (emailError === null && phoneError === null) {
-      console.log("passsed", emailError, phoneError);
       dispatch(setCartCreated(false));
       dispatch(setUser(false));
       dispatch(
@@ -59,15 +56,13 @@ export const Signup = () => {
           phone: phone,
         })
       );
-      if (message) {
+      if (err) {
         updatePopup(true);
       }
-    } else {
-      console.log("input validation failed", emailError, phoneError);
     }
   };
   useEffect(() => {
-    if (user && !isCartCreated) {
+    if (user && !cartCreated) {
       dispatch(createCart(user));
       navigate("/login");
     }
@@ -152,7 +147,7 @@ export const Signup = () => {
         </div>
       </div>
       <div>
-        {popup ? <Popup message={message} updatePopup={updatePopup} /> : null}
+        {popup ? <Popup message={err} updatePopup={updatePopup} /> : null}
       </div>
     </>
   );

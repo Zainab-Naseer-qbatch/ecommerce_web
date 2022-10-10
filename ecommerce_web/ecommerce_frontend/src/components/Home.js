@@ -4,7 +4,7 @@ import { Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { NavBar } from "../NavBar";
 export const Home = () => {
-  const user = useSelector((state) => state.user.user);
+  const { user } = useSelector((state) => state.user);
 
   return (
     <>

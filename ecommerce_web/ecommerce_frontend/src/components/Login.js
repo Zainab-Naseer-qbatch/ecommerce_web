@@ -10,38 +10,32 @@ import "../style/form.css";
 export const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const errorState = useSelector((state) => state.user.err);
-  const isloggedIn = useSelector((state) => state.user.isloggedIn);
-  const loggedUser = useSelector((state) => state.user.loggedUser);
+  const { err, isloggedIn, loggedUser } = useSelector((state) => state.user);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState(null);
-  const [error, setError] = useState(errorState);
+  const [error, setError] = useState(err);
   const handleEmail = (e) => {
     setEmail(e.target.value);
     const msg = validateEmail(e);
     setEmailError(msg);
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (emailError === null) {
-      console.log("passsed", emailError);
       dispatch(login({ email, password }));
-    } else {
-      console.log("input validation failed", emailError);
     }
   };
-  useEffect(() => {
-    console.log("inside useeffect: ", isloggedIn);
 
+  useEffect(() => {
     if (isloggedIn) {
-      console.log("islogged in: ", isloggedIn);
       dispatch(getCart(loggedUser));
       navigate("/home/welcome");
     }
   }, [isloggedIn]);
   useEffect(() => {
-    setError(errorState);
+    setError(err);
   }, []);
 
   return (

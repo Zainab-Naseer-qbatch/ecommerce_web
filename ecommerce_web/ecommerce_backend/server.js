@@ -1,17 +1,16 @@
 import express from "express";
-import { db } from "./dbConnection.js";
+import db from "./dbConnection.js";
 import * as dotenv from "dotenv";
-import { userRouter } from "./routes/userRouter.js";
-import { productRouter } from "./routes/productRouter.js";
-import { cartRouter } from "./routes/cartRouter.js";
+import router from "./routes/index.js";
+import cookieParser from "cookie-parser";
 dotenv.config();
 const PORT = process.env.PORT;
 const app = express();
 
-app.use(userRouter);
-app.use(productRouter);
-app.use(cartRouter);
+app.use(express.json());
+app.use(cookieParser());
 
+app.use(router);
 db.on("error", console.error.bind(console, "connection error: "));
 db.once("open", function () {
   console.log("Connected successfully");

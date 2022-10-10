@@ -8,7 +8,6 @@ export const Card = ({ product }) => {
   const navigate = useNavigate();
 
   const getDetails = () => {
-    console.log("product: ", product);
     window.scrollTo(0, 0);
     navigate(`${product._id}`);
   };

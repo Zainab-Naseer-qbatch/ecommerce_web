@@ -1,6 +1,10 @@
 import { Schema, model } from "mongoose";
 
 const cartSchema = new Schema({
+  user: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+  },
   products: [
     {
       product: { type: Schema.Types.ObjectId, ref: "Product" },
@@ -10,11 +14,7 @@ const cartSchema = new Schema({
   ],
   bill: { type: Number, default: 0 },
   totalQuantity: { type: Number, default: 0 },
-
-  user: {
-    type: Schema.Types.ObjectId,
-    ref: "User",
-  },
 });
 
-export const cart = model("cart", cartSchema);
+const cart = model("cart", cartSchema);
+export default cart;

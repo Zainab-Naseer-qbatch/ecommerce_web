@@ -14,6 +14,8 @@ import { Cart } from "./components/Cart";
 import { useSelector } from "react-redux";
 
 const App = () => {
+  const { isloggedIn } = useSelector((state) => state.user);
+
   return (
     <Router>
       <div className="App">
@@ -22,18 +24,20 @@ const App = () => {
             exact
             path="/"
             element={
-              useSelector((state) => state.user.loggedUser) != null ? (
+              isloggedIn ? (
                 <Navigate to="/home/welcome" />
               ) : (
                 <Navigate to="/login" />
               )
             }
           />
-
           <Route exact path="/signup" element={<Signup />} />
           <Route exact path="/login" element={<Login />} />
-
-          <Route exact path="/home" element={<Home />}>
+          <Route
+            exact
+            path="/home"
+            element={isloggedIn ? <Home /> : <Navigate to="/login" />}
+          >
             <Route exact path="welcome" element={<Welcome />} />
             <Route exact path="products" element={<AllProducts />}>
               <Route exact path=":id" element={<Product />} />

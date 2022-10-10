@@ -1,4 +1,4 @@
-export const validatePhone = (phone) => {
+const validatePhone = (phone) => {
   let pattern = /^[+][0-9]{12,13}$/;
   if (phone.match(pattern)) {
     return true;
@@ -6,3 +6,4 @@ export const validatePhone = (phone) => {
     return false;
   }
 };
+export default validatePhone;

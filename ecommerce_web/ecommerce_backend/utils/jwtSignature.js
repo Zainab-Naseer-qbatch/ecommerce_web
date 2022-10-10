@@ -1,16 +1,17 @@
-//----------------------------Generating JWT Token----------------------------
 import jwt from "jsonwebtoken";
 import * as dotenv from "dotenv";
 dotenv.config();
-export const createSignature = (user) => {
+const createSignature = (user) => {
+  const { _id, fullname, email, password } = user;
   return jwt.sign(
     {
-      id: user._id,
-      name: user.fullname,
-      email: user.email,
-      password: user.password,
+      id: _id,
+      name: fullname,
+      email: email,
+      password: password,
     },
     process.env.JWT_SECRET_KEY,
-    { expiresIn: "1h" }
+    { expiresIn: "2h" }
   );
 };
+export default createSignature;
